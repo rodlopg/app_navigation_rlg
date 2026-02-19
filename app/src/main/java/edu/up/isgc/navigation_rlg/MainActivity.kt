@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {
                 if(task.isSuccessful){
                     Toast.makeText(this,"Succesful LogIn", Toast.LENGTH_LONG).show()
 
-                    startActivity(Intent(this, Home::class.java).putExtra("email",user_mail))
+                    startActivity(Intent(this, HomeLogin::class.java).putExtra("email",user_mail))
                     finish()
                 }else{
                     Toast.makeText(this,task.exception?.message.toString(), Toast.LENGTH_LONG).show()
@@ -56,7 +56,7 @@ class MainActivity : AppCompatActivity() {
         if (usuarioActual != null){
             val user_mail = usuarioActual?.email.toString()
             Toast.makeText(this,"User already autenticated", Toast.LENGTH_LONG).show()
-            startActivity(Intent(this, Home::class.java).putExtra("email",user_mail))
+            startActivity(Intent(this, HomeLogin::class.java).putExtra("email",user_mail))
             finish()
         }
     }

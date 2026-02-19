@@ -12,6 +12,23 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Navigation_rlg">
         <activity
+            android:name=".HomeLogin"
+            android:exported="false" />
+        <activity
+            android:name=".ui.theme.HomeLogin"
+            android:exported="false" />
+        <activity
+            android:name=".Peliculas"
+            android:exported="false"
+            android:label="@string/title_activity_peliculas"
+            android:theme="@style/Theme.Navigation_rlg" />
+        <activity
+            android:name=".Add_Things"
+            android:exported="false" />
+        <activity
+            android:name=".Detail"
+            android:exported="false" />
+        <activity
             android:name=".Home"
             android:exported="false" />
         <activity

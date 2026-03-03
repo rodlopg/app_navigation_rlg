@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -13,24 +15,20 @@
         android:theme="@style/Theme.Navigation_rlg">
         <activity
             android:name=".HomeLogin"
-            android:exported="false" />
-        <activity
-            android:name=".ui.theme.HomeLogin"
-            android:exported="false" />
-        <activity
-            android:name=".Peliculas"
             android:exported="false"
-            android:label="@string/title_activity_peliculas"
-            android:theme="@style/Theme.Navigation_rlg" />
+            android:launchMode="singleInstance"/>
         <activity
             android:name=".Add_Things"
-            android:exported="false" />
+            android:exported="false"
+            android:launchMode="singleInstance"/>
         <activity
             android:name=".Detail"
-            android:exported="false" />
+            android:exported="false"
+            android:launchMode="singleInstance"/>
         <activity
             android:name=".Home"
-            android:exported="false" />
+            android:exported="false"
+            android:launchMode="singleInstance"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"

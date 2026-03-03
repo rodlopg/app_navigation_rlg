@@ -7,12 +7,15 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Button
+import android.widget.ListView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
@@ -30,6 +33,14 @@ class Home : AppCompatActivity() {
 
     lateinit var peliculas: ArrayList<Peliculas>
 
+    private fun llenaLista(){
+        val adaptador = PeliAdapter(this, peliculas)
+        val lista = findViewById<ListView>(R.id.lista)
+        lista.adapter = adaptador
+        Log.d("real-time-database", "Items in list: ${peliculas.size}")
+        Log.d("real-time-database", "ListView adapter count: ${lista.adapter.count}")
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -44,6 +55,17 @@ class Home : AppCompatActivity() {
         auth = Firebase.auth
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
+        val agregaPeliculas = findViewById<FloatingActionButton>(R.id.addMovies)
+
+        agregaPeliculas.setOnClickListener{
+            val pelicula = PeliAgrega("nombre", "genero", "anio")
+            myRef.push().setValue(pelicula).addOnCompleteListener{
+                task ->
+                if(task.isSuccessful){
+                    Toast.makeText(this, "Pelicula Agregada", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
 
         myRef.addValueEventListener(object: ValueEventListener {
 
@@ -59,7 +81,13 @@ class Home : AppCompatActivity() {
                         unit.child("genero").value.toString(),
                         unit.key.toString())
                     peliculas.add(pelicula)
+
                 }
+                val lista = findViewById<ListView>(R.id.lista)
+                lista.setOnItemClickListener{ adapterView, view, i, l ->
+                    Toast.makeText(this@Home, peliculas[i].nombre.toString(), Toast.LENGTH_SHORT).show()
+                }
+                llenaLista()
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -67,6 +95,7 @@ class Home : AppCompatActivity() {
             }
         })
     }
+
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu, menu)

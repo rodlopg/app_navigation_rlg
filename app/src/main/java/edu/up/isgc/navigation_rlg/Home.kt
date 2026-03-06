@@ -1,20 +1,17 @@
 package edu.up.isgc.navigation_rlg
 
-import android.content.ContentValues.TAG
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Button
-import android.widget.ListView
-import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
@@ -28,65 +25,68 @@ class Home : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
     val myRef = Firebase.database.getReference("peliculas")
-
-    val database = Firebase.database
-
     lateinit var peliculas: ArrayList<Peliculas>
 
-    private fun llenaLista(){
-        val adaptador = PeliAdapter(this, peliculas)
-        val lista = findViewById<ListView>(R.id.lista)
+
+    private fun llenaLista() {
+        val lista = findViewById<RecyclerView>(R.id.lista)
+        lista.layoutManager = LinearLayoutManager(this)
+
+        val adaptador = PeliAdapter(
+            peliculas,
+            onEditar = { pelicula ->
+                val intent = Intent(this, AgregarEditarPelicula::class.java)
+                intent.putExtra("id", pelicula.id)
+                intent.putExtra("nombre", pelicula.nombre)
+                intent.putExtra("anio", pelicula.anio)
+                intent.putExtra("genero", pelicula.genero)
+                startActivity(intent)
+            },
+            onEliminar = { pelicula ->
+                myRef.child(pelicula.id!!).removeValue()
+            }
+        )
+
         lista.adapter = adaptador
-        Log.d("real-time-database", "Items in list: ${peliculas.size}")
-        Log.d("real-time-database", "ListView adapter count: ${lista.adapter.count}")
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_home)
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
 
-        val extras = intent.extras
         auth = Firebase.auth
+
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
+
         val agregaPeliculas = findViewById<FloatingActionButton>(R.id.addMovies)
 
-        agregaPeliculas.setOnClickListener{
-            val pelicula = PeliAgrega("nombre", "genero", "anio")
-            myRef.push().setValue(pelicula).addOnCompleteListener{
-                task ->
-                if(task.isSuccessful){
-                    Toast.makeText(this, "Pelicula Agregada", Toast.LENGTH_LONG).show()
-                }
-            }
+        agregaPeliculas.setOnClickListener {
+            val intent = Intent(this, AgregarEditarPelicula::class.java)
+            startActivity(intent)
         }
 
-        myRef.addValueEventListener(object: ValueEventListener {
-
+        myRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                peliculas = ArrayList<Peliculas>()
+                peliculas = ArrayList()
 
-                val value = snapshot.value
-                Log.d("real-time-database", "Value is: " + value)
-                snapshot.children.forEach{
-                    unit ->
-                    var pelicula = Peliculas(unit.child("nombre").value.toString(),
+                snapshot.children.forEach { unit ->
+                    val pelicula = Peliculas(
+                        unit.child("nombre").value.toString(),
                         unit.child("anio").value.toString(),
                         unit.child("genero").value.toString(),
-                        unit.key.toString())
+                        unit.key.toString()
+                    )
                     peliculas.add(pelicula)
+                }
 
-                }
-                val lista = findViewById<ListView>(R.id.lista)
-                lista.setOnItemClickListener{ adapterView, view, i, l ->
-                    Toast.makeText(this@Home, peliculas[i].nombre.toString(), Toast.LENGTH_SHORT).show()
-                }
                 llenaLista()
             }
 
@@ -96,18 +96,17 @@ class Home : AppCompatActivity() {
         })
     }
 
-
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu, menu)
-        return super.onCreateOptionsMenu(menu)
+        return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if(item.itemId == R.id.Logout){
+        if (item.itemId == R.id.Logout) {
             auth.signOut()
+            startActivity(Intent(this, MainActivity::class.java))
             finish()
         }
-
         return super.onOptionsItemSelected(item)
     }
 }
